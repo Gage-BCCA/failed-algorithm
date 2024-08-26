@@ -29,10 +29,15 @@
       <a href="/robots">Here Be Robots</a>
       <a href="/about">About</a>
     </nav>
-    <main><h1>Learning Rust the Hard Way, Part 1: Recreating the touch Linux Command</h1>
+    <main><h1>Learning Rust the Hard Way, Part 1 - Recreating the touch Linux Command</h1>
 <p>Let's jump right in.</p>
-<p>Rust is a memory-safe, general purpose programming language who's compiler is notoriously strict, especially
-for young programming grasshoppers like myself. The whole point is to make durable programs and catch mistakes before
+<p>Rust is</p>
+<ul>
+<li>memory-safe</li>
+<li>general purpose</li>
+<li>notoriously strict (or safe, whatever you want to call it)</li>
+</ul>
+<p>The whole point is to make durable programs and catch mistakes before
 they're compiled. It's pretty nifty. My first forays into C were filled with leaks, so this part hits home.</p>
 <h2>The <code>touch</code> Command</h2>
 <p>The <code>touch</code> command simple creates a file or updates the &quot;Last Modified&quot; timestamp in the file's metadata. It's an easy command that gets a lot of use. In fact, I find myself missing it when using Windows systems, so let's recreate it.</p>
@@ -50,7 +55,12 @@ they're compiled. It's pretty nifty. My first forays into C were filled with lea
 so we'll cast the length is a 32-bit signed int for input validation later.</p>
 <h2>Validating Input</h2>
 <p>We want to make sure that the user only puts in one argument. We can do this by comparing the length of <code>args</code> vector to our desired number of arguments.</p>
-<p>One thing to note is that one argument is always passed when running a program, which is the file path of the program itself. This means that, while we want one argument when using our new <code>touch</code> command, we will need to check for the <code>args</code> vector to have a length of 2: the file path that is always passed in and the file path that user provides.</p>
+<p>One thing to note is that one argument is always passed when running a program, which is the file path of the program itself.</p>
+<p>This means that, while we want one argument when using our new <code>touch</code> command, we will need to check for the <code>args</code> vector to have a length of 2:</p>
+<ul>
+<li>the file path that is always passed in</li>
+<li>the file path that user provides.</li>
+</ul>
 <p>We'll accomplish this by using the Ordering library in the standard library.</p>
 <pre class="language-rust"><code class="language-rust"><span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span></span>env<span class="token punctuation">;</span>
 <span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span>cmp<span class="token punctuation">::</span></span><span class="token class-name">Ordering</span><span class="token punctuation">;</span>
@@ -65,12 +75,12 @@ so we'll cast the length is a 32-bit signed int for input validation later.</p>
     <span class="token punctuation">}</span></code></pre>
 <p>We do a match statement, comparing the results of comparing 2 against the <code>args</code> vector. If the number of arguments is too low or too great, we use the <code>panic!</code> macro to crash the program and give the user a simple error message.</p>
 <h2>Storing the Target File Path for Easier Use</h2>
-<p>Now, we have our input validated and ready to move on to the actual functionality.</p>
-<p>We'll store our target file path in a variable for easier use.</p>
+<p>Now, we have our input validated and ready to move on to the actual functionality. We'll store our target file path in a variable for easier use.</p>
 <pre class="language-rust"><code class="language-rust"><span class="token keyword">let</span> target <span class="token operator">=</span> <span class="token operator">&amp;</span>args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
 <p>We set the <code>target</code> variable to the value located at the 2nd position in the args vector, which should be our file path to be created.</p>
 <h2>Checking if the File Already Exists</h2>
 <p>Remember, we are skipping the functionality of <code>touch</code> that updates the file's &quot;Last Updated&quot; piece of metadata, so we need to check if the file already exists.</p>
+<p>We can use the built-in Path library to do this. It's simple and elegant.</p>
 <pre class="language-rust"><code class="language-rust"><span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span></span>env<span class="token punctuation">;</span>
 <span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span>path<span class="token punctuation">::</span></span><span class="token class-name">Path</span><span class="token punctuation">;</span>
 <span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span>cmp<span class="token punctuation">::</span></span><span class="token class-name">Ordering</span><span class="token punctuation">;</span>
@@ -81,7 +91,7 @@ so we'll cast the length is a 32-bit signed int for input validation later.</p>
     <span class="token keyword">if</span> <span class="token class-name">Path</span><span class="token punctuation">::</span><span class="token function">new</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">exists</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
         <span class="token macro property">panic!</span><span class="token punctuation">(</span><span class="token string">"File Already Exists."</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span></code></pre>
-<p>We can use the built-in Path library to do this. It's simple and elegant. Create a new path using the <code>target</code> variable that we created earlier, and call the <code>exists()</code> function. This function returns a boolean, which, if it's true, we should <code>panic!</code> and crash the program.</p>
+<p>Create a new path using the <code>target</code> variable that we created earlier, and call the <code>exists()</code> function. This function returns a boolean, which, if it's true, we should <code>panic!</code> and crash the program.</p>
 <h2>Creating the File</h2>
 <p>This part is a continuation on the <code>if</code> statement we created above. If we find that the file does <em>not</em> exist, let's move onto creating the file.</p>
 <pre class="language-rust"><code class="language-rust"><span class="token keyword">use</span> <span class="token namespace">std<span class="token punctuation">::</span></span>env<span class="token punctuation">;</span>
