@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=New+Amsterdam&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+    href="https://unpkg.com/prismjs@1.20.0/themes/prism-okaidia.css"
+    rel="stylesheet"
+  />
+    <link rel="stylesheet" href="/bundle.css" />
+    <script src="/js/bigBrother.js" defer></script>
+    <title>Failed Algorithm</title>
+  </head>
+  <body>
+    <header>
+      <h1>
+        Failed Algorithm<br>
+        <span class="deemphasis">A Personal Blog by Gage Schaffer</span>
+      </h1>
+    </header>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/posts">Posts</a>
+      <a href="/tools">Tools</a>
+      <a href="/projects">Projects</a>
+      <a href="/portfolio">Portfolio</a>
+    </nav>
+    <main><h1>Writing Custom Site Analytics: Part 1 - Getting Information from the Client</h1>
+<p>I want to record how many visitors I get on my site. I'll give you a hint: it's not many. However, I would like a general number.</p>
+<p>This kind of project also helps me practice my system design a little bit, because there's a unique challenge: How can I call an API using Javascript while keeping that API secure? I don't want bad actors enumerating my API and potentially getting access to my data.</p>
+<p>Let's dive in.</p>
+<h2>Information Gathering</h2>
+<p>One <em>very</em> important part of this project is that the information has to be anonymous. No IP addresses, no hardware information, no geolocation, etc. So what can we gather?</p>
+<p>Well, for starters, we can gather that a page view did, in fact, take place. Let's start there.</p>
+<h3>Setting up the Event Listener</h3>
+<p>We'll need to set up an event listener and detect when the page loads. After the page loads, we'll wait just a few seconds to make sure the site visit was actually done by a human.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// littleBrother.js</span>
+
+document<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'DOMContentLoaded'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token comment">// Only record a proper view after a few seconds has passed</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span>recordView<span class="token punctuation">,</span> <span class="token number">2000</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>I named my little started script <code>littleBrother.js</code> as a call back to Big Brother. It's just not <em>quite</em> as bad.</p>
+<p>First, we:</p>
+<ul>
+<li>Add an event listener on the document for the 'DOMContentLoaded' event. Once this fires off, we know that the content on the page is loaded and the user is presumably looking at a complete web page.</li>
+<li>We write a quick arrow function that sets a timer</li>
+<li>Once the timer expires, call our <code>recordView</code> function</li>
+</ul>
+<h2>Recording the View</h2>
+<p>To properly handle the view and the associated data we'll collect later, I'm going to stuff all this information into a simple class.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// littleBrother.js</span>
+
+<span class="token keyword">class</span> <span class="token class-name">View</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>timestamp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>we'll add a few more fields to this class later.</p>
+<p>Now that we have a container to hold our view, lets actually record the view.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// littleBrother.js</span>
+
+<span class="token keyword">function</span> <span class="token function">recordView</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'View recorded.'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Construct the view</span>
+  <span class="token keyword">let</span> view <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">View</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>It's that simple. After our timer from above elapses, call this function, who creates the View object.</p>
+<h2>Gathering More Information</h2>
+<p>I want this information to be anonymous, but I still want some more basic information. Let's also gather:</p>
+<ul>
+<li>Operating System</li>
+<li>What page the view is being recorded on</li>
+<li>The base URL for the site that the hit is recorded</li>
+<li>The entire path</li>
+</ul>
+<p>So far, we've had it really easy: just construct a new object and get it ready to send off the server so that a &quot;view&quot; is recorded. Let's take it a step further.</p>
+<h3>Gathering the OS</h3>
+<p>I did some local testing and had mixed results using some of the web APIs available in vanilla Javascript, so I came up with this:</p>
+<pre class="language-javascript"><code class="language-javascript">
+<span class="token comment">// Grabbing the operating system with some basic error handling</span>
+  <span class="token keyword">let</span> navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">.</span>userAgentData<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> platform<span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>navigatorData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'userAgentData not available. Using navigator.'</span><span class="token punctuation">)</span>
+    navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">;</span>
+    platform <span class="token operator">=</span> navigator<span class="token punctuation">.</span>oscpu<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>platform<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      platform <span class="token operator">=</span> <span class="token string">'Unknown'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    platform <span class="token operator">=</span> navigatorData<span class="token punctuation">.</span>platform<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+</code></pre>
+<p>First, we attempt to grab the userAgentData object. Sometimes, though, I found this value to be <code>undefined</code> when testing on various browsers. We'll do a bit of error checking here:</p>
+<ol>
+<li>See if the truthiness value of the <code>navigatorData</code> variable is false</li>
+<li>If it is false, resort to using the regular navigator object</li>
+<li>Attempt to gather the OS information from the (deprecated) <code>oscpu</code> value.</li>
+<li>Finally, if this also failed, just set the OS to &quot;unknown&quot;</li>
+</ol>
+<p>If the truthiness value of <code>navigatorData</code> is true, then we know that the userAgentData is available to us, so we can just call the platform property.</p>
+<p>I'm almost positive there are better, more comprehensive ways to accomplish this, but this has worked for me so far. Let's adjust our View class.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">class</span> <span class="token class-name">View</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>timestamp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>platform<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Now, we can set this property.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// littleBrother.js</span>
+
+<span class="token keyword">function</span> <span class="token function">recordView</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'View recorded.'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>navigator<span class="token punctuation">.</span>appName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Grabbing the operating system with some basic error handling</span>
+  <span class="token keyword">let</span> navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">.</span>userAgentData<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> platform<span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>navigatorData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'userAgentData not available. Using navigator.'</span><span class="token punctuation">)</span>
+    navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">;</span>
+
+    platform <span class="token operator">=</span> navigator<span class="token punctuation">.</span>oscpu<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>platform<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      platform <span class="token operator">=</span> <span class="token string">'Unknown'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    platform <span class="token operator">=</span> navigatorData<span class="token punctuation">.</span>platform<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Construct the view and get it ready for transport</span>
+  <span class="token keyword">let</span> view <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">View</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  view<span class="token punctuation">.</span>platform <span class="token operator">=</span> platform<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3>Gathering URL Information</h3>
+<p>This part is super easy, but super important to accurately track page views. Since we already constructed our View object earlier, and I don't have to do much extra work here, I'm going to add and directly set some new properties on my View class.</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">class</span> <span class="token class-name">View</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>timestamp <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>platform<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>path<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>site<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>fullURL<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Now we simply set the values like so in the <code>recordView</code> function.</p>
+<pre class="language-diff-javascript"><code class="language-diff-javascript">// littleBrother.js
+
+function recordView () {
+<span class="token unchanged language-javascript"><span class="token prefix unchanged"> </span> <span class="token comment">// Let the unload script know that this isn't a bounce visit</span>
+<span class="token prefix unchanged"> </span> bounceVisit <span class="token operator">=</span> <span class="token boolean">false</span>
+</span>
+<span class="token unchanged language-javascript"><span class="token prefix unchanged"> </span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'View recorded.'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>navigator<span class="token punctuation">.</span>appName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</span>
+<span class="token unchanged language-javascript"><span class="token prefix unchanged"> </span> <span class="token comment">// Grabbing the operating system with some basic error handling</span>
+<span class="token prefix unchanged"> </span> <span class="token keyword">let</span> navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">.</span>userAgentData<span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span> <span class="token keyword">let</span> platform<span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>navigatorData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token prefix unchanged"> </span>   console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'userAgentData not available. Using navigator.'</span><span class="token punctuation">)</span>
+<span class="token prefix unchanged"> </span>   navigatorData <span class="token operator">=</span> navigator<span class="token punctuation">;</span>
+</span>
+<span class="token unchanged language-javascript"><span class="token prefix unchanged"> </span>   platform <span class="token operator">=</span> navigator<span class="token punctuation">.</span>oscpu<span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span>   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>platform<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token prefix unchanged"> </span>     platform <span class="token operator">=</span> <span class="token string">'Unknown'</span><span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span>   <span class="token punctuation">}</span>
+<span class="token prefix unchanged"> </span> <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+<span class="token prefix unchanged"> </span>   platform <span class="token operator">=</span> navigatorData<span class="token punctuation">.</span>platform<span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span> <span class="token punctuation">}</span>
+</span>
+<span class="token unchanged language-javascript"><span class="token prefix unchanged"> </span> <span class="token comment">// Construct the view and get it ready for transport</span>
+<span class="token prefix unchanged"> </span> <span class="token keyword">let</span> view <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">View</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token prefix unchanged"> </span>  view<span class="token punctuation">.</span>platform <span class="token operator">=</span> platform<span class="token punctuation">;</span>
+</span><span class="token inserted-sign inserted language-javascript"><span class="token prefix inserted">+</span>  view<span class="token punctuation">.</span>path <span class="token operator">=</span> window<span class="token punctuation">.</span>location<span class="token punctuation">.</span>pathname<span class="token punctuation">;</span>
+<span class="token prefix inserted">+</span>  view<span class="token punctuation">.</span>site <span class="token operator">=</span> window<span class="token punctuation">.</span>location<span class="token punctuation">.</span>origin<span class="token punctuation">;</span>
+<span class="token prefix inserted">+</span>  view<span class="token punctuation">.</span>fullURL <span class="token operator">=</span> window<span class="token punctuation">.</span>location<span class="token punctuation">.</span>href<span class="token punctuation">;</span>
+</span>}
+</code></pre>
+<p>That's it! We now have some basic stats that are indeed anonymous.</p>
+<h2>That's All For Now</h2>
+<p>We now have some decent information that we can record in a datastore. That's all we'll do for now, as we'll need to actually start designing our system next, and recruit some help from our friendly cloud compute providers.</p>
+<h1>A Note for the Snoopy Among My Dear Readers</h1>
+<p>This file is not being distributed with the site just yet, so don't go looking for it! I want to have the system in place before taking up your bandwidth with an extra HTTP request.</p>
+</main>
+
+    <footer>
+      <p>A personal blog by Gage Schaffer</p>
+    </footer>
+  </body>
+</html>
