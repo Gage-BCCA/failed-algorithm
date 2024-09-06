@@ -31,10 +31,16 @@
       <a href="/projects">Projects</a>
       <a href="/portfolio">Portfolio</a>
     </nav>
-    <main><h1>Writing Custom Site Analytics: Part 1 - Getting Information from the Client</h1>
-<p>I want to record how many visitors I get on my site. I'll give you a hint: it's not many. However, I would like a general number.</p>
-<p>This kind of project also helps me practice my system design a little bit, because there's a unique challenge: How can I call an API using Javascript while keeping that API secure? I don't want bad actors enumerating my API and potentially getting access to my data.</p>
-<p>Let's dive in.</p>
+    <main class="post-layout"><h1>Writing Custom Site Analytics: Part 1</h1>
+<p>Thu, Aug 29, 2024</p>
+<div class="article-intro">
+<p>I want to record traffic to my site, but I want to make sure that the statistics are anonymous. Let's practice our Javascript and system design.</p>
+</div>
+<p>This kind of project also helps me practice my system design a little bit, because there's a unique challenge:</p>
+<blockquote>
+<p>How can I call an API using Javascript while keeping that API secure?</p>
+</blockquote>
+<p>I don't want bad actors enumerating my API and potentially getting access to my data. Let's dive in.</p>
 <h2>Information Gathering</h2>
 <p>One <em>very</em> important part of this project is that the information has to be anonymous. No IP addresses, no hardware information, no geolocation, etc. So what can we gather?</p>
 <p>Well, for starters, we can gather that a page view did, in fact, take place. Let's start there.</p>
