@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=New+Amsterdam&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-a11y-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/prism.min.js"></script>
+    <link rel="stylesheet" href="/static/bundle.css" />
+    <script src="/static/js/littleBrother.js" defer></script>
+
+    <title>Failed Algorithm</title>
+  </head>
+  <body>
+    <header>
+      <h1>
+        Failed Algorithm<br>
+        <span class="deemphasis">A Personal Blog by Gage Schaffer</span>
+      </h1>
+    </header>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/posts">Posts</a>
+      <a href="/tools">Tools</a>
+      <a href="/projects">Projects</a>
+      <a href="/portfolio">Portfolio</a>
+    </nav>
+    <main class="post-layout"><h1>Creating My View Counter</h1>
+<p>Sat, Sep 07, 2024</p>
+<div class="article-intro">
+<p>I love designing systems. It really tickles all the right parts of my brain. I'm using AWS to make my boring, static site into a more dynamic and interactive one.</p>
+</div>
+<p>This site was generated as a basic webpage with 11ty (which is fantastic, by the way). Originally, I just wanted a quick site for my writing and portfolio.</p>
+<p>Somewhere along the way, though, I realized I could utilize Lambda and DynamoDB to really add some interactivity to the site, so I am slowly adding features here and there. The view counter on my portfolio page was a great place to start.</p>
+<h2>Overview</h2>
+<p>To create the view counter, I need a few things:</p>
+<ul>
+<li>Javascript on the site that calls an API</li>
+<li>An API</li>
+<li>Some code to handle the API request</li>
+<li>A database that the code can pull from</li>
+</ul>
+<p>Let's work backwards. I'll start with the datastore, then move to</p>
+<h2>The Datastore</h2>
+<p>This section will be pretty short. I've decided to use DynamoDB, which is practically free, especially for the size of data that I'll be storing.</p>
+<img src="/img/posts/viewcounter/dynamoDBoverview.png"></main>
+
+    <footer>
+      <p>A personal blog by Gage Schaffer</p>
+    </footer>
+  </body>
+</html>
