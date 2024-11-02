@@ -31,12 +31,10 @@
     </nav>
     <main>
 <script src="/static/js/portfolio.js" defer></script>
-<div>
-  <img src="/static/img/placehold.svg" id="selfie">
-</div>
 
 <div class="welcome-blurb-container">
-  <h1>Hi! I'm Gage. </h1>
+  <h1>Hi! I'm Gage.<span id="cursor">|</span> </h1>
+  <img src="/static/gage.jpeg" id="selfie">
   <p>
     I'm an IT security analyst that is going through his journey to join the
     software development world. I love working on systems and making them go
@@ -160,12 +158,20 @@
   <p>Things that I've done.</p>
   <div class="project-card-container">
     <div class="project-card">
-      <img src="/static/img/computer.svg" class="project-card-icon" />
-      <h2 class="project-card-title">This Website!</h2>
-      <p>
-        I created this website with 11ty, a static site generator. It helps me
-        keep track of all my blog posts and tags.
-      </p>
+    <div class="project-header">
+      <div class="project-header-icon">
+        <img src="/static/img/computer.svg" class="project-card-icon" />
+      </div>
+      <div class="project-header-details">
+        <h2 class="project-card-title">This Website!</h2>
+        <p>
+          I created this website with 11ty, a static site generator. It helps me
+          keep track of all my blog posts and tags.
+        </p>
+        <button id="1" onclick="showDetails(this)">See More</button>
+      </div>
+    </div>
+
       <div class="project-details" id="project-details-1" style="display: none">
         <div class="project-detail-item">
           <h3 class="project-card-subtitle">
@@ -208,16 +214,22 @@
           </p>
         </div>
       </div>
-      <button id="1" onclick="showDetails(this)">See More</button>
+
     </div>
   </div>
 
   <div class="project-card-container">
     <div class="project-card">
-      <img src="/static/img/lock-icon.svg" class="project-card-icon" />
-      <h2 class="project-card-title">ZeroExfil</h2>
-
-      <p>Securely share links by protecting them with a password.</p>
+      <div class="project-header">
+        <div class="project-header-icon">
+          <img src="/static/img/lock-icon.svg" class="project-card-icon" />
+        </div>
+        <div class="project-header-details">
+          <h2 class="project-card-title">ZeroExfil</h2>
+          <p>Securely share links by protecting them with a password.</p>
+          <button id="2" onclick="showDetails(this)">See More</button>
+        </div>
+      </div>
       <div class="project-details" id="project-details-2" style="display: none">
         <div class="project-detail-item">
           <h3 class="project-card-subtitle"># Written with Flask</h3>
@@ -237,7 +249,7 @@
           </p>
         </div>
       </div>
-      <button id="2" onclick="showDetails(this)">See More</button>
+
     </div>
   </div>
 </section>
@@ -253,7 +265,7 @@
         In this article, I go over the basics of handling errors in Python with
         try and except.
       </p>
-      <a href="#">Read More</a>
+      <a href="https://www.freecodecamp.org/news/error-handling-in-python-introduction/">Read More</a>
     </div>
 
     <div class="article-card">
@@ -262,7 +274,7 @@
         I randomly stumbled upon the DefaultDict one day and decided to write an
         article about it.
       </p>
-      <a href="#">Read More</a>
+      <a href="https://www.freecodecamp.org/news/how-to-use-defaultdict-python/">Read More</a>
     </div>
   </div>
   <p style="text-align: center; padding: 15px">
@@ -289,7 +301,14 @@
     <h2># Want to Get in Touch?</h2>
     <h3>Email me here:</h3>
     <p>gage.a.schaffer@gmail.com</p>
+
+    <h3>Here's my Resume: </h3>
+    <a href="/static/schaffer-cv.pdf" target="_blank">Click Here to View</a>
   </div>
+</section>
+
+<section>
+
 </section>
 </main>
 
